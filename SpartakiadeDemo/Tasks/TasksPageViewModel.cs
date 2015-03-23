@@ -2,12 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Input;
-using Windows.Foundation;
 using Windows.UI.StartScreen;
-using Windows.UI.Xaml;
-using Windows.UI.Xaml.Controls;
-using SpartakiadeDemo.Details;
 using SpartakiadeDemo.Entities;
+using SpartakiadeDemo.Navigation;
 
 namespace SpartakiadeDemo.Tasks
 {
@@ -17,6 +14,11 @@ namespace SpartakiadeDemo.Tasks
         private TaskViewModel _selectedTask;
         public string ListTitle { get; set; }
         public ICommand PinToStartCommand { get; set; }
+
+        public TasksPageViewModel(ListTarget target)
+            : this(target.ListId)
+        {
+        }
 
         public TasksPageViewModel(long listId)
         {
@@ -44,7 +46,7 @@ namespace SpartakiadeDemo.Tasks
                 _selectedTask = value;
                 NotifyOfPropertyChange(() => _selectedTask);
 
-                ((Frame)Window.Current.Content).Navigate(typeof(TaskDetailsPage), _selectedTask.Id);
+                NavigateService.Current.Navigate(new TaskTarget(_selectedTask.Id));
             }
         }
     }

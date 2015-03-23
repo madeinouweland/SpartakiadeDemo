@@ -16,7 +16,12 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
 // The Blank Application template is documented at http://go.microsoft.com/fwlink/?LinkId=234227
+using SolidNavigation.Sdk;
+using SpartakiadeDemo.Common;
+using SpartakiadeDemo.Details;
 using SpartakiadeDemo.Lists;
+using SpartakiadeDemo.Navigation;
+using SpartakiadeDemo.Tasks;
 
 namespace SpartakiadeDemo
 {
@@ -33,6 +38,13 @@ namespace SpartakiadeDemo
         {
             this.InitializeComponent();
             this.Suspending += OnSuspending;
+
+            Router.Current.Scheme = "sparta://";
+            Router.Current.AddRoute("tasks/{taskid}/comments", typeof(TaskDetailsPage), typeof(CommentTarget));
+            Router.Current.AddRoute("tasks/{taskid}", typeof(TaskDetailsPage), typeof(TaskTarget));
+            Router.Current.AddRoute("lists/{listid}", typeof(TasksPage), typeof(ListTarget));
+      //      Router.Current.AddRoute("", typeof(ListsPage), typeof(HomeTarget));
+
         }
 
         /// <summary>
@@ -40,7 +52,7 @@ namespace SpartakiadeDemo
         /// will be used such as when the application is launched to open a specific file.
         /// </summary>
         /// <param name="e">Details about the launch request and process.</param>
-        protected override void OnLaunched(LaunchActivatedEventArgs e)
+        protected async override void OnLaunched(LaunchActivatedEventArgs e)
         {
 
 #if DEBUG
@@ -49,7 +61,7 @@ namespace SpartakiadeDemo
                 this.DebugSettings.EnableFrameRateCounter = true;
             }
 #endif
-
+            
             Frame rootFrame = Window.Current.Content as Frame;
 
             // Do not repeat app initialization when the Window already has content,
@@ -58,6 +70,7 @@ namespace SpartakiadeDemo
             {
                 // Create a Frame to act as the navigation context and navigate to the first page
                 rootFrame = new Frame();
+                SuspensionManager.RegisterFrame(rootFrame,"AppFrame");
                 // Set the default language
                 rootFrame.Language = Windows.Globalization.ApplicationLanguages.Languages[0];
 
@@ -65,11 +78,17 @@ namespace SpartakiadeDemo
 
                 if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
                 {
+                    await SuspensionManager.RestoreAsync();
                     //TODO: Load state from previously suspended application
                 }
 
                 // Place the frame in the current Window
                 Window.Current.Content = rootFrame;
+            }
+
+            if (!string.IsNullOrEmpty(e.Arguments))
+            {
+                NavigateService.Current.Navigate(e.Arguments);
             }
 
             if (rootFrame.Content == null)
@@ -80,6 +99,20 @@ namespace SpartakiadeDemo
                 rootFrame.Navigate(typeof(ListsPage), e.Arguments);
             }
             // Ensure the current window is active
+            Window.Current.Activate();
+        }
+
+        protected async override void OnActivated(IActivatedEventArgs args)
+        {
+            base.OnActivated(args);
+
+            if (args.Kind == ActivationKind.Protocol)
+            {
+                var protocolArgs = (ProtocolActivatedEventArgs)args;
+                var uri = protocolArgs.Uri.ToString().Substring(9);
+                NavigateService.Current.Navigate(uri);
+            }
+
             Window.Current.Activate();
         }
 
@@ -100,10 +133,13 @@ namespace SpartakiadeDemo
         /// </summary>
         /// <param name="sender">The source of the suspend request.</param>
         /// <param name="e">Details about the suspend request.</param>
-        private void OnSuspending(object sender, SuspendingEventArgs e)
+        private async void OnSuspending(object sender, SuspendingEventArgs e)
         {
             var deferral = e.SuspendingOperation.GetDeferral();
             //TODO: Save application state and stop any background activity
+
+            await SuspensionManager.SaveAsync();
+
             deferral.Complete();
         }
     }

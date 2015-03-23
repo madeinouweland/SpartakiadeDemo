@@ -1,6 +1,8 @@
 ﻿using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
+using SolidNavigation.Sdk;
+using SpartakiadeDemo.Navigation;
 
 namespace SpartakiadeDemo.Details
 {
@@ -14,7 +16,10 @@ namespace SpartakiadeDemo.Details
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
-            DataContext = new TaskDetailsViewModel(long.Parse(e.Parameter + ""));
+
+            var target = Router.Current.CreateTarget(e.Parameter.ToString());
+            DataContext = new TaskDetailsViewModel(target);
+            NavInfo.Text = e.Parameter.ToString();
         }
 
         private void OnBackButtonClick(object sender, RoutedEventArgs e)

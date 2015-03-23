@@ -13,6 +13,7 @@ namespace SpartakiadeDemo.Lists
         {
             base.OnNavigatedTo(e);
             DataContext = new ListsPageViewModel();
+            NavInfo.Text = e.Parameter.ToString();
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using SolidNavigation.Sdk;
 using SpartakiadeDemo.Entities;
+using SpartakiadeDemo.Navigation;
 using SpartakiadeDemo.Tasks;
 
 namespace SpartakiadeDemo.Details
@@ -11,6 +13,19 @@ namespace SpartakiadeDemo.Details
         public TaskViewModel Task { get { return _task; } }
         public List<CommentViewModel> Comments { get; set; }
         private CommentViewModel _selectedComment;
+
+        public TaskDetailsViewModel(NavigationTarget target)
+        {
+            if (target is TaskTarget)
+            {
+                LoadData((target as TaskTarget).TaskId);
+            }
+            if (target is CommentTarget)
+            {
+                LoadData((target as CommentTarget).TaskId);
+                _selectedComment = Comments.FirstOrDefault(x => x.Id == (target as CommentTarget).CommentId);
+            }
+        }
 
         public TaskDetailsViewModel(long taskId)
         {
